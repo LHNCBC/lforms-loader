@@ -1,0 +1,22 @@
+{
+  "name": "lforms-loader",
+  "version": "1.0.0",
+  "description": "A script for dynamically loading a specified version of lforms onto a web page.",
+  "main": "source/lformsLoader.js",
+  "scripts": {
+    "test": "TBD"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lhncbc/lforms-loader.git"
+  },
+  "author": "",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "bugs": {
+    "url": "https://github.com/lhncbc/lforms-loader/issues"
+  },
+  "homepage": "https://github.com/lhncbc/lforms-loader#readme",
+  "dependencies": {
+    "semver": "^7.5.4"
+  }
+}
