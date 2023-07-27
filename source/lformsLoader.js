@@ -2,7 +2,7 @@
 // and also exports useful functions for getting the list of supported versions
 // and switching to a new version.
 
-import semverSort from 'semver/functions/rsort';
+import semverSort from 'semver/functions/rsort.js';
 
 /**
  *  Loads LForms into the page, returning a promise that resolves when it is
