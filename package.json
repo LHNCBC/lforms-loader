@@ -4,7 +4,14 @@
   "description": "A script for dynamically loading a specified version of lforms onto a web page.",
   "main": "source/lformsLoader.js",
   "scripts": {
-    "test": "TBD"
+    "build": "rollup -c rollup.config.mjs",
+    "test": "cypress run --project test"
+  },
+  "targets": {
+    "default": {
+      "isLibrary": true,
+      "distDir": "./dist"
+    }
   },
   "repository": {
     "type": "git",
@@ -17,6 +24,14 @@
   },
   "homepage": "https://github.com/lhncbc/lforms-loader#readme",
   "dependencies": {
+    "rollup": "^3.26.3",
     "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "cypress": "^12.17.2",
+    "http-server": "^14.1.1",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "start-server-and-test": "^2.0.0"
   }
 }
