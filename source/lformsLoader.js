@@ -9,9 +9,13 @@ import semverSort from 'semver/functions/rsort';
  *  ready.
  * @param version the version to be loaded
  * @param styleCallback (optional) a function to call as soon as the styles are loaded
+ * @param lhcFormsSource (optional) a base URL from which the LForms files can be
+ *  retrieved.  If not specified, the Clinical Table Search Service, which also
+ *  hosts most versions of LForms, will be used as the source.
  */
-export function loadLForms(version, styleCallback) {
-  const lformsDir = "https://clinicaltables.nlm.nih.gov/lforms-versions/"+version;
+export function loadLForms(version, styleCallback, lhcFormsSource) {
+  const lformsDir = lhcFormsSource ? lhcFormsSource :
+    "https://clinicaltables.nlm.nih.gov/lforms-versions/"+version;
   // TBD Add support for versions < 33
   let cssFile, lformsScripts, fhirScript;
   const majorVersion = version.split('.')[0];
@@ -62,7 +66,8 @@ export function loadLForms(version, styleCallback) {
 
 /**
  *  Returns a promise that resolves to an array of the available LForms version
- *  strings for the versions supported by this loader script.
+ *  strings for the versions supported by this loader script.  The versions will
+ *  be sorted, with the most recent version first.
  */
 export function getSupportedLFormsVersions() {
   return fetch('https://clinicaltables.nlm.nih.gov/lforms-versions').then(response=>{
