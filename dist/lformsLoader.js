@@ -1,4 +1,8 @@
-const debug = (
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+const debug$1 = (
   typeof process === 'object' &&
   process.env &&
   process.env.NODE_DEBUG &&
@@ -6,7 +10,7 @@ const debug = (
 ) ? (...args) => console.error('SEMVER', ...args)
   : () => {};
 
-var debug_1 = debug;
+var debug_1 = debug$1;
 
 // Note: this is the semver.org version of the spec that it implements
 // Not necessarily the package version of this code.
@@ -44,236 +48,229 @@ var constants = {
   FLAG_LOOSE: 0b010,
 };
 
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
+var re$1 = {exports: {}};
 
-var re_1 = createCommonjsModule(function (module, exports) {
-const {
-  MAX_SAFE_COMPONENT_LENGTH,
-  MAX_SAFE_BUILD_LENGTH,
-  MAX_LENGTH,
-} = constants;
+(function (module, exports) {
+	const {
+	  MAX_SAFE_COMPONENT_LENGTH,
+	  MAX_SAFE_BUILD_LENGTH,
+	  MAX_LENGTH,
+	} = constants;
+	const debug = debug_1;
+	exports = module.exports = {};
 
-exports = module.exports = {};
+	// The actual regexps go on exports.re
+	const re = exports.re = [];
+	const safeRe = exports.safeRe = [];
+	const src = exports.src = [];
+	const t = exports.t = {};
+	let R = 0;
 
-// The actual regexps go on exports.re
-const re = exports.re = [];
-const safeRe = exports.safeRe = [];
-const src = exports.src = [];
-const t = exports.t = {};
-let R = 0;
+	const LETTERDASHNUMBER = '[a-zA-Z0-9-]';
 
-const LETTERDASHNUMBER = '[a-zA-Z0-9-]';
+	// Replace some greedy regex tokens to prevent regex dos issues. These regex are
+	// used internally via the safeRe object since all inputs in this library get
+	// normalized first to trim and collapse all extra whitespace. The original
+	// regexes are exported for userland consumption and lower level usage. A
+	// future breaking change could export the safer regex only with a note that
+	// all input should have extra whitespace removed.
+	const safeRegexReplacements = [
+	  ['\\s', 1],
+	  ['\\d', MAX_LENGTH],
+	  [LETTERDASHNUMBER, MAX_SAFE_BUILD_LENGTH],
+	];
 
-// Replace some greedy regex tokens to prevent regex dos issues. These regex are
-// used internally via the safeRe object since all inputs in this library get
-// normalized first to trim and collapse all extra whitespace. The original
-// regexes are exported for userland consumption and lower level usage. A
-// future breaking change could export the safer regex only with a note that
-// all input should have extra whitespace removed.
-const safeRegexReplacements = [
-  ['\\s', 1],
-  ['\\d', MAX_LENGTH],
-  [LETTERDASHNUMBER, MAX_SAFE_BUILD_LENGTH],
-];
+	const makeSafeRegex = (value) => {
+	  for (const [token, max] of safeRegexReplacements) {
+	    value = value
+	      .split(`${token}*`).join(`${token}{0,${max}}`)
+	      .split(`${token}+`).join(`${token}{1,${max}}`);
+	  }
+	  return value
+	};
 
-const makeSafeRegex = (value) => {
-  for (const [token, max] of safeRegexReplacements) {
-    value = value
-      .split(`${token}*`).join(`${token}{0,${max}}`)
-      .split(`${token}+`).join(`${token}{1,${max}}`);
-  }
-  return value
-};
+	const createToken = (name, value, isGlobal) => {
+	  const safe = makeSafeRegex(value);
+	  const index = R++;
+	  debug(name, index, value);
+	  t[name] = index;
+	  src[index] = value;
+	  re[index] = new RegExp(value, isGlobal ? 'g' : undefined);
+	  safeRe[index] = new RegExp(safe, isGlobal ? 'g' : undefined);
+	};
 
-const createToken = (name, value, isGlobal) => {
-  const safe = makeSafeRegex(value);
-  const index = R++;
-  debug_1(name, index, value);
-  t[name] = index;
-  src[index] = value;
-  re[index] = new RegExp(value, isGlobal ? 'g' : undefined);
-  safeRe[index] = new RegExp(safe, isGlobal ? 'g' : undefined);
-};
+	// The following Regular Expressions can be used for tokenizing,
+	// validating, and parsing SemVer version strings.
 
-// The following Regular Expressions can be used for tokenizing,
-// validating, and parsing SemVer version strings.
+	// ## Numeric Identifier
+	// A single `0`, or a non-zero digit followed by zero or more digits.
 
-// ## Numeric Identifier
-// A single `0`, or a non-zero digit followed by zero or more digits.
+	createToken('NUMERICIDENTIFIER', '0|[1-9]\\d*');
+	createToken('NUMERICIDENTIFIERLOOSE', '\\d+');
 
-createToken('NUMERICIDENTIFIER', '0|[1-9]\\d*');
-createToken('NUMERICIDENTIFIERLOOSE', '\\d+');
+	// ## Non-numeric Identifier
+	// Zero or more digits, followed by a letter or hyphen, and then zero or
+	// more letters, digits, or hyphens.
 
-// ## Non-numeric Identifier
-// Zero or more digits, followed by a letter or hyphen, and then zero or
-// more letters, digits, or hyphens.
+	createToken('NONNUMERICIDENTIFIER', `\\d*[a-zA-Z-]${LETTERDASHNUMBER}*`);
 
-createToken('NONNUMERICIDENTIFIER', `\\d*[a-zA-Z-]${LETTERDASHNUMBER}*`);
+	// ## Main Version
+	// Three dot-separated numeric identifiers.
 
-// ## Main Version
-// Three dot-separated numeric identifiers.
+	createToken('MAINVERSION', `(${src[t.NUMERICIDENTIFIER]})\\.` +
+	                   `(${src[t.NUMERICIDENTIFIER]})\\.` +
+	                   `(${src[t.NUMERICIDENTIFIER]})`);
 
-createToken('MAINVERSION', `(${src[t.NUMERICIDENTIFIER]})\\.` +
-                   `(${src[t.NUMERICIDENTIFIER]})\\.` +
-                   `(${src[t.NUMERICIDENTIFIER]})`);
+	createToken('MAINVERSIONLOOSE', `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
+	                        `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
+	                        `(${src[t.NUMERICIDENTIFIERLOOSE]})`);
 
-createToken('MAINVERSIONLOOSE', `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
-                        `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
-                        `(${src[t.NUMERICIDENTIFIERLOOSE]})`);
+	// ## Pre-release Version Identifier
+	// A numeric identifier, or a non-numeric identifier.
 
-// ## Pre-release Version Identifier
-// A numeric identifier, or a non-numeric identifier.
+	createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NUMERICIDENTIFIER]
+	}|${src[t.NONNUMERICIDENTIFIER]})`);
 
-createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NUMERICIDENTIFIER]
-}|${src[t.NONNUMERICIDENTIFIER]})`);
+	createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NUMERICIDENTIFIERLOOSE]
+	}|${src[t.NONNUMERICIDENTIFIER]})`);
 
-createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NUMERICIDENTIFIERLOOSE]
-}|${src[t.NONNUMERICIDENTIFIER]})`);
+	// ## Pre-release Version
+	// Hyphen, followed by one or more dot-separated pre-release version
+	// identifiers.
 
-// ## Pre-release Version
-// Hyphen, followed by one or more dot-separated pre-release version
-// identifiers.
+	createToken('PRERELEASE', `(?:-(${src[t.PRERELEASEIDENTIFIER]
+	}(?:\\.${src[t.PRERELEASEIDENTIFIER]})*))`);
 
-createToken('PRERELEASE', `(?:-(${src[t.PRERELEASEIDENTIFIER]
-}(?:\\.${src[t.PRERELEASEIDENTIFIER]})*))`);
+	createToken('PRERELEASELOOSE', `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]
+	}(?:\\.${src[t.PRERELEASEIDENTIFIERLOOSE]})*))`);
 
-createToken('PRERELEASELOOSE', `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]
-}(?:\\.${src[t.PRERELEASEIDENTIFIERLOOSE]})*))`);
+	// ## Build Metadata Identifier
+	// Any combination of digits, letters, or hyphens.
 
-// ## Build Metadata Identifier
-// Any combination of digits, letters, or hyphens.
+	createToken('BUILDIDENTIFIER', `${LETTERDASHNUMBER}+`);
 
-createToken('BUILDIDENTIFIER', `${LETTERDASHNUMBER}+`);
+	// ## Build Metadata
+	// Plus sign, followed by one or more period-separated build metadata
+	// identifiers.
 
-// ## Build Metadata
-// Plus sign, followed by one or more period-separated build metadata
-// identifiers.
+	createToken('BUILD', `(?:\\+(${src[t.BUILDIDENTIFIER]
+	}(?:\\.${src[t.BUILDIDENTIFIER]})*))`);
 
-createToken('BUILD', `(?:\\+(${src[t.BUILDIDENTIFIER]
-}(?:\\.${src[t.BUILDIDENTIFIER]})*))`);
+	// ## Full Version String
+	// A main version, followed optionally by a pre-release version and
+	// build metadata.
 
-// ## Full Version String
-// A main version, followed optionally by a pre-release version and
-// build metadata.
+	// Note that the only major, minor, patch, and pre-release sections of
+	// the version string are capturing groups.  The build metadata is not a
+	// capturing group, because it should not ever be used in version
+	// comparison.
 
-// Note that the only major, minor, patch, and pre-release sections of
-// the version string are capturing groups.  The build metadata is not a
-// capturing group, because it should not ever be used in version
-// comparison.
+	createToken('FULLPLAIN', `v?${src[t.MAINVERSION]
+	}${src[t.PRERELEASE]}?${
+	  src[t.BUILD]}?`);
 
-createToken('FULLPLAIN', `v?${src[t.MAINVERSION]
-}${src[t.PRERELEASE]}?${
-  src[t.BUILD]}?`);
+	createToken('FULL', `^${src[t.FULLPLAIN]}$`);
 
-createToken('FULL', `^${src[t.FULLPLAIN]}$`);
+	// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
+	// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
+	// common in the npm registry.
+	createToken('LOOSEPLAIN', `[v=\\s]*${src[t.MAINVERSIONLOOSE]
+	}${src[t.PRERELEASELOOSE]}?${
+	  src[t.BUILD]}?`);
 
-// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
-// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
-// common in the npm registry.
-createToken('LOOSEPLAIN', `[v=\\s]*${src[t.MAINVERSIONLOOSE]
-}${src[t.PRERELEASELOOSE]}?${
-  src[t.BUILD]}?`);
+	createToken('LOOSE', `^${src[t.LOOSEPLAIN]}$`);
 
-createToken('LOOSE', `^${src[t.LOOSEPLAIN]}$`);
+	createToken('GTLT', '((?:<|>)?=?)');
 
-createToken('GTLT', '((?:<|>)?=?)');
+	// Something like "2.*" or "1.2.x".
+	// Note that "x.x" is a valid xRange identifer, meaning "any version"
+	// Only the first item is strictly required.
+	createToken('XRANGEIDENTIFIERLOOSE', `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`);
+	createToken('XRANGEIDENTIFIER', `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`);
 
-// Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifer, meaning "any version"
-// Only the first item is strictly required.
-createToken('XRANGEIDENTIFIERLOOSE', `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`);
-createToken('XRANGEIDENTIFIER', `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`);
+	createToken('XRANGEPLAIN', `[v=\\s]*(${src[t.XRANGEIDENTIFIER]})` +
+	                   `(?:\\.(${src[t.XRANGEIDENTIFIER]})` +
+	                   `(?:\\.(${src[t.XRANGEIDENTIFIER]})` +
+	                   `(?:${src[t.PRERELEASE]})?${
+	                     src[t.BUILD]}?` +
+	                   `)?)?`);
 
-createToken('XRANGEPLAIN', `[v=\\s]*(${src[t.XRANGEIDENTIFIER]})` +
-                   `(?:\\.(${src[t.XRANGEIDENTIFIER]})` +
-                   `(?:\\.(${src[t.XRANGEIDENTIFIER]})` +
-                   `(?:${src[t.PRERELEASE]})?${
-                     src[t.BUILD]}?` +
-                   `)?)?`);
+	createToken('XRANGEPLAINLOOSE', `[v=\\s]*(${src[t.XRANGEIDENTIFIERLOOSE]})` +
+	                        `(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})` +
+	                        `(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})` +
+	                        `(?:${src[t.PRERELEASELOOSE]})?${
+	                          src[t.BUILD]}?` +
+	                        `)?)?`);
 
-createToken('XRANGEPLAINLOOSE', `[v=\\s]*(${src[t.XRANGEIDENTIFIERLOOSE]})` +
-                        `(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})` +
-                        `(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})` +
-                        `(?:${src[t.PRERELEASELOOSE]})?${
-                          src[t.BUILD]}?` +
-                        `)?)?`);
+	createToken('XRANGE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAIN]}$`);
+	createToken('XRANGELOOSE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`);
 
-createToken('XRANGE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAIN]}$`);
-createToken('XRANGELOOSE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`);
+	// Coercion.
+	// Extract anything that could conceivably be a part of a valid semver
+	createToken('COERCE', `${'(^|[^\\d])' +
+	              '(\\d{1,'}${MAX_SAFE_COMPONENT_LENGTH}})` +
+	              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
+	              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
+	              `(?:$|[^\\d])`);
+	createToken('COERCERTL', src[t.COERCE], true);
 
-// Coercion.
-// Extract anything that could conceivably be a part of a valid semver
-createToken('COERCE', `${'(^|[^\\d])' +
-              '(\\d{1,'}${MAX_SAFE_COMPONENT_LENGTH}})` +
-              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
-              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
-              `(?:$|[^\\d])`);
-createToken('COERCERTL', src[t.COERCE], true);
+	// Tilde ranges.
+	// Meaning is "reasonably at or greater than"
+	createToken('LONETILDE', '(?:~>?)');
 
-// Tilde ranges.
-// Meaning is "reasonably at or greater than"
-createToken('LONETILDE', '(?:~>?)');
+	createToken('TILDETRIM', `(\\s*)${src[t.LONETILDE]}\\s+`, true);
+	exports.tildeTrimReplace = '$1~';
 
-createToken('TILDETRIM', `(\\s*)${src[t.LONETILDE]}\\s+`, true);
-exports.tildeTrimReplace = '$1~';
+	createToken('TILDE', `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`);
+	createToken('TILDELOOSE', `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`);
 
-createToken('TILDE', `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`);
-createToken('TILDELOOSE', `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`);
+	// Caret ranges.
+	// Meaning is "at least and backwards compatible with"
+	createToken('LONECARET', '(?:\\^)');
 
-// Caret ranges.
-// Meaning is "at least and backwards compatible with"
-createToken('LONECARET', '(?:\\^)');
+	createToken('CARETTRIM', `(\\s*)${src[t.LONECARET]}\\s+`, true);
+	exports.caretTrimReplace = '$1^';
 
-createToken('CARETTRIM', `(\\s*)${src[t.LONECARET]}\\s+`, true);
-exports.caretTrimReplace = '$1^';
+	createToken('CARET', `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`);
+	createToken('CARETLOOSE', `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`);
 
-createToken('CARET', `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`);
-createToken('CARETLOOSE', `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`);
+	// A simple gt/lt/eq thing, or just "" to indicate "any version"
+	createToken('COMPARATORLOOSE', `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`);
+	createToken('COMPARATOR', `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`);
 
-// A simple gt/lt/eq thing, or just "" to indicate "any version"
-createToken('COMPARATORLOOSE', `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`);
-createToken('COMPARATOR', `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`);
+	// An expression to strip any whitespace between the gtlt and the thing
+	// it modifies, so that `> 1.2.3` ==> `>1.2.3`
+	createToken('COMPARATORTRIM', `(\\s*)${src[t.GTLT]
+	}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true);
+	exports.comparatorTrimReplace = '$1$2$3';
 
-// An expression to strip any whitespace between the gtlt and the thing
-// it modifies, so that `> 1.2.3` ==> `>1.2.3`
-createToken('COMPARATORTRIM', `(\\s*)${src[t.GTLT]
-}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true);
-exports.comparatorTrimReplace = '$1$2$3';
+	// Something like `1.2.3 - 1.2.4`
+	// Note that these all use the loose form, because they'll be
+	// checked against either the strict or loose comparator form
+	// later.
+	createToken('HYPHENRANGE', `^\\s*(${src[t.XRANGEPLAIN]})` +
+	                   `\\s+-\\s+` +
+	                   `(${src[t.XRANGEPLAIN]})` +
+	                   `\\s*$`);
 
-// Something like `1.2.3 - 1.2.4`
-// Note that these all use the loose form, because they'll be
-// checked against either the strict or loose comparator form
-// later.
-createToken('HYPHENRANGE', `^\\s*(${src[t.XRANGEPLAIN]})` +
-                   `\\s+-\\s+` +
-                   `(${src[t.XRANGEPLAIN]})` +
-                   `\\s*$`);
+	createToken('HYPHENRANGELOOSE', `^\\s*(${src[t.XRANGEPLAINLOOSE]})` +
+	                        `\\s+-\\s+` +
+	                        `(${src[t.XRANGEPLAINLOOSE]})` +
+	                        `\\s*$`);
 
-createToken('HYPHENRANGELOOSE', `^\\s*(${src[t.XRANGEPLAINLOOSE]})` +
-                        `\\s+-\\s+` +
-                        `(${src[t.XRANGEPLAINLOOSE]})` +
-                        `\\s*$`);
+	// Star ranges basically just allow anything at all.
+	createToken('STAR', '(<|>)?=?\\s*\\*');
+	// >=0.0.0 is like a star
+	createToken('GTE0', '^\\s*>=\\s*0\\.0\\.0\\s*$');
+	createToken('GTE0PRE', '^\\s*>=\\s*0\\.0\\.0-0\\s*$'); 
+} (re$1, re$1.exports));
 
-// Star ranges basically just allow anything at all.
-createToken('STAR', '(<|>)?=?\\s*\\*');
-// >=0.0.0 is like a star
-createToken('GTE0', '^\\s*>=\\s*0\\.0\\.0\\s*$');
-createToken('GTE0PRE', '^\\s*>=\\s*0\\.0\\.0-0\\s*$');
-});
-re_1.re;
-re_1.safeRe;
-re_1.src;
-re_1.t;
-re_1.tildeTrimReplace;
-re_1.caretTrimReplace;
-re_1.comparatorTrimReplace;
+var reExports = re$1.exports;
 
 // parse out just the options we care about
 const looseOption = Object.freeze({ loose: true });
 const emptyOpts = Object.freeze({ });
-const parseOptions = options => {
+const parseOptions$1 = options => {
   if (!options) {
     return emptyOpts
   }
@@ -284,7 +281,7 @@ const parseOptions = options => {
 
   return options
 };
-var parseOptions_1 = parseOptions;
+var parseOptions_1 = parseOptions$1;
 
 const numeric = /^[0-9]+$/;
 const compareIdentifiers$1 = (a, b) => {
@@ -310,14 +307,15 @@ var identifiers = {
   rcompareIdentifiers,
 };
 
+const debug = debug_1;
 const { MAX_LENGTH, MAX_SAFE_INTEGER } = constants;
-const { safeRe: re, t } = re_1;
+const { safeRe: re, t } = reExports;
 
-
+const parseOptions = parseOptions_1;
 const { compareIdentifiers } = identifiers;
-class SemVer {
+let SemVer$1 = class SemVer {
   constructor (version, options) {
-    options = parseOptions_1(options);
+    options = parseOptions(options);
 
     if (version instanceof SemVer) {
       if (version.loose === !!options.loose &&
@@ -336,7 +334,7 @@ class SemVer {
       )
     }
 
-    debug_1('SemVer', version, options);
+    debug('SemVer', version, options);
     this.options = options;
     this.loose = !!options.loose;
     // this isn't actually relevant for versions, but keep it so that we
@@ -400,7 +398,7 @@ class SemVer {
   }
 
   compare (other) {
-    debug_1('SemVer.compare', this.version, this.options, other);
+    debug('SemVer.compare', this.version, this.options, other);
     if (!(other instanceof SemVer)) {
       if (typeof other === 'string' && other === this.version) {
         return 0
@@ -445,7 +443,7 @@ class SemVer {
     do {
       const a = this.prerelease[i];
       const b = other.prerelease[i];
-      debug_1('prerelease compare', i, a, b);
+      debug('prerelease compare', i, a, b);
       if (a === undefined && b === undefined) {
         return 0
       } else if (b === undefined) {
@@ -469,7 +467,7 @@ class SemVer {
     do {
       const a = this.build[i];
       const b = other.build[i];
-      debug_1('prerelease compare', i, a, b);
+      debug('prerelease compare', i, a, b);
       if (a === undefined && b === undefined) {
         return 0
       } else if (b === undefined) {
@@ -608,19 +606,23 @@ class SemVer {
     }
     return this
   }
-}
+};
 
-var semver = SemVer;
+var semver = SemVer$1;
 
-const compareBuild = (a, b, loose) => {
-  const versionA = new semver(a, loose);
-  const versionB = new semver(b, loose);
+const SemVer = semver;
+const compareBuild$1 = (a, b, loose) => {
+  const versionA = new SemVer(a, loose);
+  const versionB = new SemVer(b, loose);
   return versionA.compare(versionB) || versionA.compareBuild(versionB)
 };
-var compareBuild_1 = compareBuild;
+var compareBuild_1 = compareBuild$1;
 
-const rsort = (list, loose) => list.sort((a, b) => compareBuild_1(b, a, loose));
+const compareBuild = compareBuild_1;
+const rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose));
 var rsort_1 = rsort;
+
+var semverSort = /*@__PURE__*/getDefaultExportFromCjs(rsort_1);
 
 // This file defines the function for loading a particular version of lforms,
 // and also exports useful functions for getting the list of supported versions
@@ -705,7 +707,7 @@ function getSupportedLFormsVersions() {
         const versions  =
           [...pageText.matchAll(/<span class="name">lforms-(.*)\.zip<\/span>/g)].map(
             m=>m[1]).filter(v=>v.split('.')[0]>=29);
-        rsort_1(versions);
+        semverSort(versions);
         return versions;
       });
     }
