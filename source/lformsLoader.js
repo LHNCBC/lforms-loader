@@ -109,7 +109,7 @@ export function changeLFormsVersion(newLFormsVersion) {
 
 
 /**
- *  Loads a tag (for CSS or a script) and returns a promise the resolves
+ *  Loads a tag (for CSS or a script) and returns a promise that resolves
  *  when all of the associated file has loaded or has failed to load.
  * @param tag the tag to load
  */

@@ -6,7 +6,7 @@ and script tags to the page.
 Exported functions:
 
 * loadLForms(version, styleCallback, lhcFormsSource):  This adds tags to the
-  current page to load LHC-Forms, and returns a promose that resolves when the
+  current page to load LHC-Forms, and returns a promise that resolves when the
   files have been loaded (or fail to load, in which case the promise will be
   rejected).
   * version: the version to be loaded (e.g., '33.4.1').

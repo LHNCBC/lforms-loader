@@ -6,7 +6,7 @@ describe('loadLForms', ()=>{
       expect(win.LForms).to.be.undefined;
       win.loadLForms('33.4.2').then(()=>LForms.Util.addFormToPage(form, 'formDiv')).then(()=>{
         // I wanted to test whether LForms was undefined, but Cypress tries to
-        // make a string of it, which results in an exception be throws.  Checking
+        // make a string of it, which results in an exception being thrown.  Checking
         // just for LForms.lformsVersion should suffice.
         expect(win.LForms.lformsVersion).to.be.not.undefined;
       });
