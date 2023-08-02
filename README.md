@@ -23,5 +23,5 @@ Exported functions:
   version by reloading the page to the same URL but with the parameters "lfv"
   set to the new LForms version.  The app should then call the loadLForms
   function to load that requested version.
- * newLFormsVersion: the new version to switch to (assumed valid)
+  * newLFormsVersion: the new version to switch to (assumed valid)
 
