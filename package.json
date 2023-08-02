@@ -1,0 +1,37 @@
+{
+  "name": "lforms-loader",
+  "version": "1.0.0",
+  "description": "A script for dynamically loading a specified version of lforms onto a web page.",
+  "main": "source/lformsLoader.js",
+  "scripts": {
+    "build": "rollup -c rollup.config.mjs",
+    "test": "cypress run --project test"
+  },
+  "targets": {
+    "default": {
+      "isLibrary": true,
+      "distDir": "./dist"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lhncbc/lforms-loader.git"
+  },
+  "author": "",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "bugs": {
+    "url": "https://github.com/lhncbc/lforms-loader/issues"
+  },
+  "homepage": "https://github.com/lhncbc/lforms-loader#readme",
+  "dependencies": {
+    "rollup": "^3.26.3",
+    "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.3",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "cypress": "^12.17.2",
+    "http-server": "^14.1.1",
+    "start-server-and-test": "^2.0.0"
+  }
+}

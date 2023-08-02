@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <title>Test page for lforms-loader</title>
+  </head>
+  <body>
+    <div id=formDiv></div>
+    <!--script type="module" src="../source/lformsLoader.js"></script-->
+    <script type="module">
+      import {loadLForms, getSupportedLFormsVersions, changeLFormsVersion}
+        from '../../dist/lformsLoader.js';
+      const form = '{"resourceType": "Questionnaire", "title": "Test Form"}';
+      // We let the tests add LForms to the page, so we can test different
+      // values for the parameters.
+      //loadLForms('33.4.2').then(()=>LForms.Util.addFormToPage(form, 'formDiv'));
+      // For the e2e tests:
+      window.loadLForms = loadLForms;
+      window.getSupportedLFormsVersions = getSupportedLFormsVersions;
+      window.changeLFormsVersion = changeLFormsVersion;
+    </script>
+  </body>
+</html>
