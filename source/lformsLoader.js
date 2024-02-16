@@ -15,7 +15,7 @@ import semverSort from 'semver/functions/rsort.js';
  */
 export function loadLForms(version, styleCallback, lhcFormsSource) {
   const lformsDir = lhcFormsSource ? lhcFormsSource :
-    "https://clinicaltables.nlm.nih.gov/lforms-versions/"+version;
+    "https://lhcfhirtools-static.nlm.nih.gov/lforms-versions/"+version;
   // TBD Add support for versions < 33
   let cssFile, lformsScripts, fhirScript;
   const majorVersion = version.split('.')[0];
@@ -70,12 +70,12 @@ export function loadLForms(version, styleCallback, lhcFormsSource) {
  *  be sorted, with the most recent version first.
  */
 export function getSupportedLFormsVersions() {
-  return fetch('https://clinicaltables.nlm.nih.gov/lforms-versions').then(response=>{
-    // https://clinicaltables.nlm.nih.gov/lforms-versions contains output like:
+  return fetch('https://lhcfhirtools-static.nlm.nih.gov/lforms-versions').then(response=>{
+    // https://lhcfhirtools-static.nlm.nih.gov/lforms-versions contains output like:
     // <span class="name">lforms-9.0.2.zip</span>
     if (!response.ok) {
       throw new Error('Unable to the retrive the list of LForms versions from '+
-        'https://clinicaltables.nlm.nih.gov/lforms-versions');
+        'https://lhcfhirtools-static.nlm.nih.gov/lforms-versions');
     }
     else {
       return response.text().then(pageText=>{
