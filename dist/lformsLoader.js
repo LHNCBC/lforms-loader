@@ -629,6 +629,8 @@ var semverSort = /*@__PURE__*/getDefaultExportFromCjs(rsort_1);
 // and switching to a new version.
 
 
+const DEFAULT_LFORMS_SOURCE = 'https://lhcfhirtools-static.nlm.nih.gov/lforms-versions';
+
 /**
  *  Loads LForms into the page, returning a promise that resolves when it is
  *  ready.
@@ -640,7 +642,7 @@ var semverSort = /*@__PURE__*/getDefaultExportFromCjs(rsort_1);
  */
 function loadLForms(version, styleCallback, lhcFormsSource) {
   const lformsDir = lhcFormsSource ? lhcFormsSource :
-    "https://clinicaltables.nlm.nih.gov/lforms-versions/"+version;
+    `${DEFAULT_LFORMS_SOURCE}/${version}`;
   // TBD Add support for versions < 33
   let cssFile, lformsScripts, fhirScript;
   const majorVersion = version.split('.')[0];
@@ -695,12 +697,12 @@ function loadLForms(version, styleCallback, lhcFormsSource) {
  *  be sorted, with the most recent version first.
  */
 function getSupportedLFormsVersions() {
-  return fetch('https://clinicaltables.nlm.nih.gov/lforms-versions').then(response=>{
-    // https://clinicaltables.nlm.nih.gov/lforms-versions contains output like:
+  return fetch(DEFAULT_LFORMS_SOURCE).then(response=>{
+    // https://lhcfhirtools-static.nlm.nih.gov/lforms-versions contains output like:
     // <span class="name">lforms-9.0.2.zip</span>
     if (!response.ok) {
       throw new Error('Unable to the retrive the list of LForms versions from '+
-        'https://clinicaltables.nlm.nih.gov/lforms-versions');
+        DEFAULT_LFORMS_SOURCE);
     }
     else {
       return response.text().then(pageText=>{
