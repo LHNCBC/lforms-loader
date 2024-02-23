@@ -629,7 +629,7 @@ var semverSort = /*@__PURE__*/getDefaultExportFromCjs(rsort_1);
 // and switching to a new version.
 
 
-const DEFAULT_LFORMS_SOURCE = 'https://lhcfhirtools-static.nlm.nih.gov/lforms-versions';
+const DEFAULT_LFORMS_SOURCE = 'https://lhcfhirtools-static.nlm.nih.gov/lforms-versions/';
 
 /**
  *  Loads LForms into the page, returning a promise that resolves when it is
@@ -642,7 +642,7 @@ const DEFAULT_LFORMS_SOURCE = 'https://lhcfhirtools-static.nlm.nih.gov/lforms-ve
  */
 function loadLForms(version, styleCallback, lhcFormsSource) {
   const lformsDir = lhcFormsSource ? lhcFormsSource :
-    `${DEFAULT_LFORMS_SOURCE}/${version}`;
+    `${DEFAULT_LFORMS_SOURCE}${version}`;
   // TBD Add support for versions < 33
   let cssFile, lformsScripts, fhirScript;
   const majorVersion = version.split('.')[0];
