@@ -697,18 +697,19 @@ function loadLForms(version, styleCallback, lhcFormsSource) {
  *  be sorted, with the most recent version first.
  */
 function getSupportedLFormsVersions() {
-  return fetch(DEFAULT_LFORMS_SOURCE).then(response=>{
-    // https://lhcfhirtools-static.nlm.nih.gov/lforms-versions contains output like:
+  return fetch(DEFAULT_LFORMS_SOURCE).then(response=> {
+    // https://lhcfhirtools-static.nlm.nih.gov/lforms-versions/ contains output like:
+    // <a href='lforms-9.0.2.zip'>lforms-9.0.2.zip</a>
+    // https://clinicaltables.nlm.nih.gov/lforms-versions contains output like:
     // <span class="name">lforms-9.0.2.zip</span>
     if (!response.ok) {
-      throw new Error('Unable to the retrive the list of LForms versions from '+
-        DEFAULT_LFORMS_SOURCE);
-    }
-    else {
-      return response.text().then(pageText=>{
-        const versions  =
-          [...pageText.matchAll(/<span class="name">lforms-(.*)\.zip<\/span>/g)].map(
-            m=>m[1]).filter(v=>v.split('.')[0]>=29);
+      throw new Error('Unable to the retrive the list of LForms versions from ' +
+          DEFAULT_LFORMS_SOURCE);
+    } else {
+      return response.text().then(pageText => {
+        const versions =
+            [...pageText.matchAll(/>lforms-(.*)\.zip</g)].map(
+                m => m[1]).filter(v => v.split('.')[0] >= 29);
         semverSort(versions);
         return versions;
       });
