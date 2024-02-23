@@ -4,7 +4,7 @@
 
 import semverSort from 'semver/functions/rsort.js';
 
-const DEFAULT_LFORMS_SOURCE = 'https://lhcfhirtools-static.nlm.nih.gov/lforms-versions';
+const DEFAULT_LFORMS_SOURCE = 'https://lhcfhirtools-static.nlm.nih.gov/lforms-versions/';
 
 /**
  *  Loads LForms into the page, returning a promise that resolves when it is
@@ -17,7 +17,7 @@ const DEFAULT_LFORMS_SOURCE = 'https://lhcfhirtools-static.nlm.nih.gov/lforms-ve
  */
 export function loadLForms(version, styleCallback, lhcFormsSource) {
   const lformsDir = lhcFormsSource ? lhcFormsSource :
-    `${DEFAULT_LFORMS_SOURCE}/${version}`;
+    `${DEFAULT_LFORMS_SOURCE}${version}`;
   // TBD Add support for versions < 33
   let cssFile, lformsScripts, fhirScript;
   const majorVersion = version.split('.')[0];
