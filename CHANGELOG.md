@@ -3,6 +3,10 @@
 This log documents the significant changes for each release.
 This project follows [Semantic Versioning](http://semver.org/).
 
+## [2.0.2] 2024-02-23
+### Fixed
+- Parsing lforms versions returned by https://lhcfhirtools-static.nlm.nih.gov/lforms-versions/.
+
 ## [2.0.1] 2024-02-23
 ### Changed
 - Added '/' to lhcfhirtools-static.nlm.nih.gov/lforms-versions to avoid redirect.
