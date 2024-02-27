@@ -708,7 +708,7 @@ function getSupportedLFormsVersions() {
     } else {
       return response.text().then(pageText => {
         const versions =
-            [...pageText.matchAll(/>lforms-(.*)\.zip</g)].map(
+            [...pageText.matchAll(/>lforms-([^<]+)\.zip</g)].map(
                 m => m[1]).filter(v => v.split('.')[0] >= 29);
         semverSort(versions);
         return versions;
