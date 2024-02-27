@@ -60,6 +60,18 @@ describe('getSupportedLFormsVersions', () => {
       });
     });
   });
+
+  it('should be return the beta versions', (done) => {
+    cy.visit('test/pages/testPage.html');
+    cy.window().then(win => {
+      win.getSupportedLFormsVersions().then(versions => {
+        expect(versions).to.have.length.greaterThan(0);
+        const indexOf33_0_0_beta_0 = versions.indexOf('30.0.0-beta.0');
+        expect(indexOf33_0_0_beta_0).not.to.equal(-1);
+        done();
+      });
+    });
+  });
 });
 
 describe('changeLFormsVersion', () => {
