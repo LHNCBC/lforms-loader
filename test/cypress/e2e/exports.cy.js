@@ -48,29 +48,29 @@ describe('loadLForms', () => {
 
 
 describe('getSupportedLFormsVersions', () => {
-  it('should be return the LForms versions in order of most recent to least', (done) => {
+  let versions = [];
+
+  before((done) => {
     cy.visit('test/pages/testPage.html');
     cy.window().then(win => {
-      win.getSupportedLFormsVersions().then(versions => {
-        expect(versions).to.have.length.greaterThan(0);
-        const indexOf33_4_2 = versions.indexOf('33.4.2');
-        const indexOf33_4_1 = versions.indexOf('33.4.1');
-        expect(indexOf33_4_2).to.be.lessThan(indexOf33_4_1);
+      win.getSupportedLFormsVersions().then(lformsVersions => {
+        versions = lformsVersions;
         done();
       });
     });
   });
 
-  it('should be return the beta versions', (done) => {
-    cy.visit('test/pages/testPage.html');
-    cy.window().then(win => {
-      win.getSupportedLFormsVersions().then(versions => {
-        expect(versions).to.have.length.greaterThan(0);
-        const indexOf33_0_0_beta_0 = versions.indexOf('30.0.0-beta.0');
-        expect(indexOf33_0_0_beta_0).not.to.equal(-1);
-        done();
-      });
-    });
+  it('should be return the LForms versions in order of most recent to least', () => {
+    expect(versions).to.have.length.greaterThan(0);
+    const indexOf33_4_2 = versions.indexOf('33.4.2');
+    const indexOf33_4_1 = versions.indexOf('33.4.1');
+    expect(indexOf33_4_2).to.be.lessThan(indexOf33_4_1);
+  });
+
+  it('should be return the beta versions', () => {
+    expect(versions).to.have.length.greaterThan(0);
+    const indexOf33_0_0_beta_0 = versions.indexOf('30.0.0-beta.0');
+    expect(indexOf33_0_0_beta_0).not.to.equal(-1);
   });
 });
 
