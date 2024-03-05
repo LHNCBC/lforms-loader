@@ -12,7 +12,7 @@ Exported functions:
   * version: the version to be loaded (e.g., '33.4.1').
   * styleCallback: (optional) a function to call as soon as the lforms styles are loaded
   * lhcFormsSource: (optional) a base URL from which the lforms files can be
-    retrieved.  If not specified, the NLM lhcfhirtools-static website will be 
+    retrieved.  If not specified, the NLM lhcforms-static website will be 
     used as the source.
 
 * getSupportedLFormsVersions():  Returns a promise that resolves to an array of
