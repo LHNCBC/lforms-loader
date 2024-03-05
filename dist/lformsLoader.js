@@ -629,7 +629,7 @@ var semverSort = /*@__PURE__*/getDefaultExportFromCjs(rsort_1);
 // and switching to a new version.
 
 
-const DEFAULT_LFORMS_SOURCE = 'https://lhcfhirtools-static.nlm.nih.gov/lforms-versions/';
+const DEFAULT_LFORMS_SOURCE = 'https://lhcforms-static.nlm.nih.gov/lforms-versions/';
 
 /**
  *  Loads LForms into the page, returning a promise that resolves when it is
@@ -698,7 +698,7 @@ function loadLForms(version, styleCallback, lhcFormsSource) {
  */
 function getSupportedLFormsVersions() {
   return fetch(DEFAULT_LFORMS_SOURCE).then(response=> {
-    // https://lhcfhirtools-static.nlm.nih.gov/lforms-versions/ contains output like:
+    // https://lhcforms-static.nlm.nih.gov/lforms-versions/ contains output like:
     // <a href='lforms-9.0.2.zip'>lforms-9.0.2.zip</a>
     // https://clinicaltables.nlm.nih.gov/lforms-versions contains output like:
     // <span class="name">lforms-9.0.2.zip</span>
