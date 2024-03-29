@@ -634,10 +634,11 @@ const DEFAULT_LFORMS_SOURCE = 'https://lhcforms-static.nlm.nih.gov/lforms-versio
 /**
  *  Loads LForms into the page, returning a promise that resolves when it is
  *  ready.
- * @param version the version to be loaded
+ * @param version the version to be loaded.  This is ignored if lhcFormsSource is
+ *  provided.
  * @param styleCallback (optional) a function to call as soon as the styles are loaded
  * @param lhcFormsSource (optional) a base URL from which the LForms files can be
- *  retrieved.  If not specified, the Clinical Table Search Service, which also
+ *  retrieved.  If not specified, the DEFAULT_LFORMS_SOURCE, which also
  *  hosts most versions of LForms, will be used as the source.
  */
 function loadLForms(version, styleCallback, lhcFormsSource) {
@@ -687,7 +688,7 @@ function loadLForms(version, styleCallback, lhcFormsSource) {
   // We need to wait for the LForms script to load before loading the FHIR
   // support.
   return Promise.all(loadPromises).then(()=>console.log(
-    'Loaded LHC-Forms version '+version));
+    'Loaded LHC-Forms ' + (lhcFormsSource ? 'from '+lhcFormsSource : 'version '+version)));
 }
 
 
