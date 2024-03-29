@@ -36,10 +36,10 @@ describe('loadLForms', () => {
     // should since it is the same host.
     cy.visit('test/pages/testPage.html');
     cy.window().then(win => {
-      win.loadLForms('33.4.2', null,
+      win.loadLForms('33.4.0', null, // 33.4.0 should be ignored
         'https://lforms-service.nlm.nih.gov/lforms-versions/33.4.2').then(() =>
         win.LForms.Util.addFormToPage(form, 'formDiv')).then(() => {
-        expect(win.LForms.lformsVersion).to.be.not.undefined;
+        expect(win.LForms.lformsVersion).to.equal('33.4.2');
         done();
       });
     });
