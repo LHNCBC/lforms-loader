@@ -1,6 +1,6 @@
 {
   "name": "lforms-loader",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "A script for dynamically loading a specified version of lforms onto a web page.",
   "main": "source/lformsLoader.js",
   "scripts": {

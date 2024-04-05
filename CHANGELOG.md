@@ -3,6 +3,10 @@
 This log documents the significant changes for each release.
 This project follows [Semantic Versioning](http://semver.org/).
 
+## [3.0.2] 2024-04-05
+### Fixed
+- Add event parameter to reject() and resolve() calls in loadTag().
+
 ## [3.0.1] 2024-03-29
 ### Fixed
 - Corrected the console log message which loadLForms outputs after LHC-Forms is

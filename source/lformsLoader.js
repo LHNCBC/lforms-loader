@@ -120,10 +120,10 @@ export function changeLFormsVersion(newLFormsVersion) {
 function loadTag(tag) {
   return new Promise((resolve, reject) => {
     tag.addEventListener('error', (event)=>{
-      reject();
+      reject(event);
     });
     tag.addEventListener('load', (event)=>{
-      resolve();
+      resolve(event);
     });
     if (tag.tagName == 'LINK')
       document.head.appendChild(tag);
