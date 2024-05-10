@@ -139,7 +139,7 @@ describe('getSupportedLFormsVersions - Retry', () => {
   });
 });
 
-describe.only('loadLForms - Retry', () => {
+describe('loadLForms - Retry', () => {
   let latestVersion;
 
   before(() => {
@@ -206,7 +206,7 @@ describe.only('loadLForms - Retry', () => {
     });
     cy.wait('@lformsJs', {timeout: 10000});
     cy.get('@retryMsgs').should('have.callCount', 9);
-});
+  });
 });
 
 
