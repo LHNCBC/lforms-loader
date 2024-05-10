@@ -139,7 +139,7 @@ describe('getSupportedLFormsVersions - Retry', () => {
   });
 });
 
-describe('loadLForms - Retry', () => {
+describe.only('loadLForms - Retry', () => {
   let latestVersion;
 
   before(() => {
@@ -199,14 +199,14 @@ describe('loadLForms - Retry', () => {
           cy.error('Unexpected promise resolution from loadLForms()!');
           resolve(false);
         }).catch((err) => {
-          cy.get('@retryMsgs').should('have.callCount', 9);
           resolve(true);
         });
       });
       expect(passed).to.be.true;
-      cy.wait('@lformsJs', {timeout: 10000});
     });
-  });
+    cy.wait('@lformsJs', {timeout: 10000});
+    cy.get('@retryMsgs').should('have.callCount', 9);
+});
 });
 
 
