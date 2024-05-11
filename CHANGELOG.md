@@ -3,6 +3,10 @@
 This log documents the significant changes for each release.
 This project follows [Semantic Versioning](http://semver.org/).
 
+## [3.0.3] 2024-05-10
+### Fixed
+- Retry loading the libraries in case of failures.
+
 ## [3.0.2] 2024-04-05
 ### Fixed
 - Add event parameter to reject() and resolve() calls in loadTag().
