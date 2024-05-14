@@ -774,12 +774,11 @@ function getSupportedLFormsVersions() {
   function loop() {
     return new Promise((resolve, reject) => {
       _getSupportedLFormsVersions().then((versions) => {
-        versions[0];
         resolve(versions);
       }).catch((err) => {
         tries++;
         if(tries > MAX_TRIES) {
-          const msg = `${Date.now()}: Failed to get LForms version after ${tries} attempts.`;
+          const msg = `${Date.now()}: Failed to get LForms version after ${tries - 1} attempts.`;
           console.error(`${msg} - ${err.stack}`);
           reject(err);
         }
