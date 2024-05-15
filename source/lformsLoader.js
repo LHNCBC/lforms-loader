@@ -6,6 +6,8 @@ import semverSort from 'semver/functions/rsort.js';
 
 const DEFAULT_LFORMS_SOURCE = 'https://lhcforms-static.nlm.nih.gov/lforms-versions/';
 
+const MAX_TRIES = 10;
+
 /**
  *  Loads LForms into the page, returning a promise that resolves when it is
  *  ready.
@@ -16,7 +18,7 @@ const DEFAULT_LFORMS_SOURCE = 'https://lhcforms-static.nlm.nih.gov/lforms-versio
  *  retrieved.  If not specified, the DEFAULT_LFORMS_SOURCE, which also
  *  hosts most versions of LForms, will be used as the source.
  */
-export function loadLForms(version, styleCallback, lhcFormsSource) {
+function _loadLForms(version, styleCallback, lhcFormsSource) {
   const lformsDir = lhcFormsSource ? lhcFormsSource :
     `${DEFAULT_LFORMS_SOURCE}${version}`;
   // TBD Add support for versions < 33
@@ -72,14 +74,14 @@ export function loadLForms(version, styleCallback, lhcFormsSource) {
  *  strings for the versions supported by this loader script.  The versions will
  *  be sorted, with the most recent version first.
  */
-export function getSupportedLFormsVersions() {
+function _getSupportedLFormsVersions() {
   return fetch(DEFAULT_LFORMS_SOURCE).then(response=> {
     // https://lhcforms-static.nlm.nih.gov/lforms-versions/ contains output like:
     // <a href='lforms-9.0.2.zip'>lforms-9.0.2.zip</a>
     // https://clinicaltables.nlm.nih.gov/lforms-versions contains output like:
     // <span class="name">lforms-9.0.2.zip</span>
     if (!response.ok) {
-      throw new Error('Unable to the retrive the list of LForms versions from ' +
+      throw new Error('Unable to retrieve the list of LForms versions from ' +
           DEFAULT_LFORMS_SOURCE);
     } else {
       return response.text().then(pageText => {
@@ -133,3 +135,82 @@ function loadTag(tag) {
     }
   });
 }
+
+/**
+ *  Get an array of all available lforms version strings. The list is sorted with
+ *  the most recent first. If it encounters errors when fetching from the server,
+ *  it will re-try upto maximum number of times defined above.
+ * 
+ * @returns - A promise which resolves to a list of versions if successful, other
+ *    wise rejects after maximum tries.
+ */
+export function getSupportedLFormsVersions() {
+  let tries = 1;
+  function loop() {
+    return new Promise((resolve, reject) => {
+      _getSupportedLFormsVersions().then((versions) => {
+        resolve(versions);
+      }).catch((err) => {
+        tries++;
+        if(tries > MAX_TRIES) {
+          const msg = `${Date.now()}: Failed to get LForms version after ${tries - 1} attempts.`;
+          console.error(`${msg} - ${err.stack}`);
+          reject(err);
+        }
+        else {
+          setTimeout(async () => {
+            console.log(`${Date.now()}: ${err.message}`);
+            console.log(`Retrying getSupportedLFormsVersions() again: ${tries}...`);
+            await loop().then(resolve, reject);
+          }, 500);
+        }
+      });
+    });
+  }
+  return loop();
+}
+
+/**
+ *  Loads LForms into the page, returning a promise that resolves when it is
+ *  ready. If it encounters errors when fetching from the server, it will re-try
+ *  upto maximum number of times defined above.
+ * 
+ * @param version the version to be loaded.  This is ignored if lhcFormsSource is
+ *   provided.
+ * @param styleCallback (optional) a function to call as soon as the styles are loaded
+ * @param lhcFormsSource (optional) a base URL from which the LForms files can be
+ *   retrieved.  If not specified, the DEFAULT_LFORMS_SOURCE, which also
+ *   hosts most versions of LForms, will be used as the source.
+ * 
+ * @returns - A promise which resolves to loaded version string, a confirmation
+ *   that the required version is available in the page. If it fails, it will reject
+ *   with an error event emitted by the browser.
+ */
+
+export function loadLForms(version, styleCallback, lhcFormsSource) {
+  let tries = 1;
+
+  function loop() {
+    return new Promise((resolve, reject) => {
+      _loadLForms(version, styleCallback, lhcFormsSource).then(() => {
+        resolve(LForms.lformsVersion);
+      }).catch((errorEvent) => {
+        tries++;
+        if(tries > MAX_TRIES) {
+          const msg = `${Date.now()}: Failed to get LForms library files after ${tries} attempts.`;
+          console.error(`${msg} - ${errorEvent.error?.stack}`);
+          reject(errorEvent);
+        }
+        else {
+          setTimeout(async () => {
+            console.log(`${Date.now()}: ${errorEvent.message}`);
+            console.log(`Retrying loadLForms() again: ${tries}...`);
+            await loop(version).then(resolve, reject);
+          }, 500);
+        }
+      });
+    });
+  }
+  return loop();
+}
+
