@@ -159,7 +159,7 @@ export function getSupportedLFormsVersions() {
         }
         else {
           setTimeout(async () => {
-            console.error(`${Date.now()}: ${err.message}`);
+            console.log(`${Date.now()}: ${err.message}`);
             console.log(`Retrying getSupportedLFormsVersions() again: ${tries}...`);
             await loop().then(resolve, reject);
           }, 500);
@@ -203,7 +203,7 @@ export function loadLForms(version, styleCallback, lhcFormsSource) {
         }
         else {
           setTimeout(async () => {
-            console.error(`${Date.now()}: ${errorEvent.message}`);
+            console.log(`${Date.now()}: ${errorEvent.message}`);
             console.log(`Retrying loadLForms() again: ${tries}...`);
             await loop(version).then(resolve, reject);
           }, 500);
