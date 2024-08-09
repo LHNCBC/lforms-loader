@@ -23,3 +23,18 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+/**
+ * Intended to create a mock response for .js files.
+ * Copied from https://github.com/cypress-io/cypress/issues/1271#issuecomment-818909021
+ */
+Cypress.Commands.add('mockThirdPartyJS', (url, fixturePath, _as) => {
+    return cy.readFile(
+        `cypress/fixtures/${fixturePath}`,
+        'utf8'
+    ).then((stubResponse) => {
+        cy.intercept(url, (req) => {
+            req.reply(stubResponse)
+        }).as(_as);
+    });
+});

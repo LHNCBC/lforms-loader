@@ -812,13 +812,13 @@ function getSupportedLFormsVersions() {
  *   with an error event emitted by the browser.
  */
 
-function loadLForms(version, styleCallback, lhcFormsSource) {
+async function loadLForms(version, styleCallback, lhcFormsSource) {
   let tries = 1;
 
   function loop() {
     return new Promise((resolve, reject) => {
       _loadLForms(version, styleCallback, lhcFormsSource).then(() => {
-        resolve(LForms.lformsVersion);
+        return resolve(LForms.lformsVersion);
       }).catch((errorEvent) => {
         tries++;
         if(tries > MAX_TRIES) {
@@ -830,13 +830,33 @@ function loadLForms(version, styleCallback, lhcFormsSource) {
           setTimeout(async () => {
             console.log(`${Date.now()}: ${errorEvent.message}`);
             console.log(`Retrying loadLForms() again: ${tries}...`);
-            await loop().then(resolve, reject);
+            return await loop().then(resolve, reject);
           }, 500);
         }
       });
     });
   }
-  return loop();
+  return await loop();
 }
 
-export { changeLFormsVersion, getSupportedLFormsVersions, loadLForms };
+
+/**
+ * Loads latest released version of LForms. If it fails, it attempts to load previous version.
+ *
+ * @returns {Promise<unknown>} - Promise resolves to loaded version.
+ */
+
+async function loadLatestLForms() {
+  return await getSupportedLFormsVersions().then(async (versions) => {
+    const latestVersion = versions[0];
+    const backupVersion = versions[1];
+    return await loadLForms(latestVersion).catch(async (error) => {
+      if(backupVersion) {
+        return await loadLForms(backupVersion);
+      }
+      throw error;
+    });
+  });
+}
+
+export { changeLFormsVersion, getSupportedLFormsVersions, loadLForms, loadLatestLForms };

@@ -6,7 +6,7 @@
     <div id=formDiv></div>
     <!--script type="module" src="../source/lformsLoader.js"></script-->
     <script type="module">
-      import {loadLForms, getSupportedLFormsVersions, changeLFormsVersion}
+      import {loadLForms, getSupportedLFormsVersions, changeLFormsVersion, loadLatestLForms}
         from '../../dist/lformsLoader.js';
       // We let the tests add LForms to the page, so we can test different
       // values for the parameters.
@@ -15,6 +15,7 @@
       window.loadLForms = loadLForms;
       window.getSupportedLFormsVersions = getSupportedLFormsVersions;
       window.changeLFormsVersion = changeLFormsVersion;
+      window.loadLatestLForms = loadLatestLForms;
     </script>
   </body>
 </html>
