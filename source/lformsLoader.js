@@ -186,7 +186,6 @@ export function getSupportedLFormsVersions() {
  *   that the required version is available in the page. If it fails, it will reject
  *   with an error event emitted by the browser.
  */
-
 export async function loadLForms(version, styleCallback, lhcFormsSource) {
   let tries = 1;
 
@@ -220,7 +219,6 @@ export async function loadLForms(version, styleCallback, lhcFormsSource) {
  *
  * @returns {Promise<unknown>} - Promise resolves to loaded version.
  */
-
 export async function loadLatestLForms() {
   return await getSupportedLFormsVersions().then(async (versions) => {
     const latestVersion = versions[0];
@@ -233,5 +231,4 @@ export async function loadLatestLForms() {
     });
   });
 }
-
 
