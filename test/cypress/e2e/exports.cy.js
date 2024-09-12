@@ -213,7 +213,7 @@ describe('loadLatestLForms', () => {
   const latestVersion = '36.3.3', backupVersion = '36.3.2';
 
   beforeEach(() => {
-    cy.mockThirdPartyJS( `**/lforms-versions/`, 'fhir-versions.mock.html', 'getVersionsHtml');
+    cy.mockThirdPartyJS( `**/lforms-versions/`, 'lforms-versions.mock.html', 'getVersionsHtml');
 
     // Ignore these downloads.
     cy.intercept({url: `**/lforms-versions/**/zone.min.js`, method: 'GET', times: 10}, {

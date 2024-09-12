@@ -192,7 +192,7 @@ export async function loadLForms(version, styleCallback, lhcFormsSource) {
   function loop() {
     return new Promise((resolve, reject) => {
       _loadLForms(version, styleCallback, lhcFormsSource).then(() => {
-        return resolve(LForms.lformsVersion);
+        resolve(LForms.lformsVersion);
       }).catch((errorEvent) => {
         tries++;
         if(tries > MAX_TRIES) {
@@ -204,13 +204,13 @@ export async function loadLForms(version, styleCallback, lhcFormsSource) {
           setTimeout(async () => {
             console.log(`${Date.now()}: ${errorEvent.message}`);
             console.log(`Retrying loadLForms() again: ${tries}...`);
-            return await loop(version).then(resolve, reject);
+            return loop(version).then(resolve, reject);
           }, 500);
         }
       });
     });
   }
-  return await loop();
+  return loop();
 }
 
 

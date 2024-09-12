@@ -1,2 +1,5 @@
 node_modules
 test/cypress/videos
+dist
+.idea/
+.vscode/
