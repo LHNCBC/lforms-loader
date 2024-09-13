@@ -28,5 +28,5 @@ Exported functions:
 * loadLatestLForms(): Loads latest released version of LForms. If it fails, it
   attempts to load the previous version. It uses getSupportedLFormsVersion() to fetch
   the latest and previous versions and attempts to load the latest first. If that
-  version cannot be loaded, it attempts to load the previous version. If succeeds,
+  version cannot be loaded, it attempts to load the previous version. If it succeeds,
   the returned promise resolves to the loaded version.
