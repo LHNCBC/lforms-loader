@@ -209,4 +209,64 @@ describe('loadLForms - Retry', () => {
   });
 });
 
+describe('loadLatestLForms', () => {
+  const latestVersion = '36.3.3', backupVersion = '36.3.2';
+
+  beforeEach(() => {
+    cy.mockThirdPartyJS( `**/lforms-versions/`, 'lforms-versions.mock.html', 'getVersionsHtml');
+
+    // Ignore these downloads.
+    cy.intercept({url: `**/lforms-versions/**/zone.min.js`, method: 'GET', times: 10}, {
+      statusCode: 200,
+    }).as('zoneJs');
+    cy.intercept({url: `**/lforms-versions/**/styles.css`, method: 'GET', times: 10}, {
+      statusCode: 200
+    }).as('stylesCss');
+    cy.intercept({url: `**/lforms-versions/**/lformsFHIRAll.min.js`, method: 'GET', times: 10}, {
+      statusCode: 200
+    }).as('stylesCss');
+
+    cy.visit('test/pages/testPage.html');
+  });
+
+  it('should load latest version', (done) => {
+
+    cy.mockThirdPartyJS( `**/lforms-versions/${latestVersion}/**/lhc-forms.js`, 'lhc-lforms-36.3.3.js', 'xx3LFormsJs');
+
+    cy.window().as('win');
+    cy.get('@win').then(async (win) => {
+      const loadedVersion = await win.loadLatestLForms();
+      expect(loadedVersion).to.equal(latestVersion);
+      expect(win.LForms.lformsVersion).to.equal(latestVersion);
+      done();
+    });
+
+    cy.wait('@getVersionsHtml');
+    cy.wait('@xx3LFormsJs');
+  });
+
+  it('should load backup version', (done) => {
+    // Error out on latest version
+    cy.intercept({url: `**/lforms-versions/${latestVersion}/**/lhc-forms.js`, method: 'GET', times: 10}, {
+      statusCode: 404,
+    }).as('lformsJs');
+
+    // Should load backup
+    cy.mockThirdPartyJS( `**/lforms-versions/${backupVersion}/**/lhc-forms.js`, 'lhc-lforms-36.3.2.js', 'xx2LFormsJs');
+
+    cy.window().as('win');
+    cy.get('@win').then(async (win) => {
+      const loadedVersion = await win.loadLatestLForms();
+      expect(loadedVersion).to.equal(backupVersion);
+      expect(win.LForms.lformsVersion).to.equal(backupVersion);
+      done();
+    });
+
+    cy.wait('@getVersionsHtml');
+    cy.wait('@xx3LFormsJs');
+    cy.wait('@xx2LFormsJs', {timeout: 10000});
+  });
+
+});
+
 

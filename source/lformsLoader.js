@@ -186,8 +186,7 @@ export function getSupportedLFormsVersions() {
  *   that the required version is available in the page. If it fails, it will reject
  *   with an error event emitted by the browser.
  */
-
-export function loadLForms(version, styleCallback, lhcFormsSource) {
+export async function loadLForms(version, styleCallback, lhcFormsSource) {
   let tries = 1;
 
   function loop() {
@@ -205,12 +204,31 @@ export function loadLForms(version, styleCallback, lhcFormsSource) {
           setTimeout(async () => {
             console.log(`${Date.now()}: ${errorEvent.message}`);
             console.log(`Retrying loadLForms() again: ${tries}...`);
-            await loop(version).then(resolve, reject);
+            return loop(version).then(resolve, reject);
           }, 500);
         }
       });
     });
   }
   return loop();
+}
+
+
+/**
+ * Loads latest released version of LForms. If it fails, it attempts to load previous version.
+ *
+ * @returns {Promise<unknown>} - Promise resolves to loaded version.
+ */
+export async function loadLatestLForms() {
+  return await getSupportedLFormsVersions().then(async (versions) => {
+    const latestVersion = versions[0];
+    const backupVersion = versions[1];
+    return await loadLForms(latestVersion).catch(async (error) => {
+      if(backupVersion) {
+        return await loadLForms(backupVersion);
+      }
+      throw error;
+    });
+  });
 }
 
