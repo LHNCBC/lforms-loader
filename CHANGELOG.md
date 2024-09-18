@@ -3,8 +3,8 @@
 This log documents the significant changes for each release.
 This project follows [Semantic Versioning](http://semver.org/).
 
-## [3.1.0] 2024-08-09
-### Fixed
+## [3.1.0] 2024-09-18
+### Added
 - Added loadLatestLForms().
 
 ## [3.0.3] 2024-05-10
