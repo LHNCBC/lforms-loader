@@ -3,6 +3,12 @@
 This log documents the significant changes for each release.
 This project follows [Semantic Versioning](http://semver.org/).
 
+## [3.1.2] 2025-01-31
+### Fixed
+- npm ci was complaining about an invalid package-lock.json.  This might have
+  been due to the update of Node.js in the previous version, but it wasn't
+  noticed in time.
+
 ## [3.1.1] 2025-01-30
 ### Fixed
 - Moved rollup to devDependencies
